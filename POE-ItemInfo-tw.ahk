@@ -109,6 +109,8 @@
 ; Run test suites (see end of script)
 ; Note: don't set this to true for normal every day use...
 ; This is just for fellow developers.
+;
+; Chinese Language Author: Dken
 RunTests := False
 
 #SingleInstance force
