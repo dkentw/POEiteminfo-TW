@@ -111,6 +111,8 @@
 ; This is just for fellow developers.
 ;
 ; Chinese Language Author: Dken
+; https://github.com/dkentw/POEiteminfo-TW
+;
 RunTests := False
 
 #SingleInstance force
