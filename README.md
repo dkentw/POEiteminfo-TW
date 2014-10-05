@@ -6,7 +6,7 @@ POE tool for checking the info of item, this version is for Taiwan server.
 
 ## 安裝 ##
 - 請先安裝 AutoHotKey v1.0.45 以上 [http://ahkscript.org/download/](http://ahkscript.org/download/)
-- 從右下可以下載整個 zip file
+- 從右邊可以下載整個 zip file
 - 解壓後, 按右鍵讓 AutoHotkey 執行 POE-ItemInfo-tw.ahk 即可
 
 ### 注意事項 ###
