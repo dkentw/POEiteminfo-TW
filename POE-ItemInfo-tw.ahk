@@ -275,11 +275,11 @@ SetFont(Font)
  
 ParseElementalDamage(String, DmgType, ByRef DmgLo, ByRef DmgHi)
 {
-    IfInString, String, %DmgType% 
+    IfInString, String, %DmgType%傷害 
     {
-        IfInString, String, Converted to or IfInString, String, taken as
+        IfInString, String, 轉換 or IfInString, String, 承受
             return
-        IfNotInString, String, increased 
+        IfNotInString, String, 增加
         {
             StringSplit, Arr, String, %A_Space%
             StringSplit, Arr, Arr2, -
@@ -3994,10 +3994,6 @@ AssembleDamageDetails(FullItemData)
         IfInString, A_LoopField, 物理傷害:
         {
 ;            IsWeapon := True
-			IfInString, A_LoopField, 附加:
-			{
-				Continue
-			}
             StringSplit, Arr, A_LoopField, %A_Space%
             StringSplit, Arr, Arr2, -
             PhysLo := Arr1
@@ -4020,23 +4016,23 @@ AssembleDamageDetails(FullItemData)
         }
         
         ; Get percentage physical damage increase
-        IfInString, A_LoopField, `% 物理傷害
+        IfInString, A_LoopField, `% 物理傷害 and IfInString, A_LoopField, 增加
         {
             StringSplit, Arr, A_LoopField, %A_Space%, `%
-            PhysMult := Arr1
+            PhysMult := Arr2
             Continue
         }
         
         ;Lines to skip fix for converted type damage. Like the Voltaxic Rift
-        IfInString, A_LoopField, Converted to
+        IfInString, A_LoopField, 轉換為
             Goto, SkipDamageParse
-        IfInString, A_LoopField, can Shock
+        IfInString, A_LoopField, 可以感電
             Goto, SkipDamageParse
 
         ; Lines to skip for weapons that alter damage based on if equipped as
         ; main or off hand. In that case skipp the off hand calc and just use
         ; main hand as determining factor. Examples: Dyadus, Wings of Entropy
-        IfInString, A_LoopField, in Off Hand
+        IfInString, A_LoopField, 在副手
             Goto, SkipDamageParse
 
         ; Parse elemental damage
@@ -4057,7 +4053,9 @@ AssembleDamageDetails(FullItemData)
     EleDps := ((ChaoLo + ChaoHi + ColdLo + ColdHi + FireLo + FireHi + LighLo + LighHi) / 2) * AttackSpeed
     TotalDps := PhysDps + EleDps
     
-    Result = %Result%`nPhys DPS:   %PhysDps%`nElem DPS:   %EleDps%`nTotal DPS:  %TotalDps%
+    Result := Result . "`n物理 DPS:" . StrPad(PhysDps, 8, Side="left") 
+    Result := Result . "`n元素 DPS:" . StrPad(EleDps, 8, Side="left") 
+    Result := Result . "`n總合 DPS:" . StrPad(TotalDps, 8, Side="left")
     
     ; Only show Q20 values if item is not Q20
     If (Quality < 20) {
@@ -4065,7 +4063,7 @@ AssembleDamageDetails(FullItemData)
         BasePhysDps := PhysDps / TotalPhysMult
         Q20Dps := BasePhysDps * ((PhysMult + 120) / 100) + EleDps
         
-        Result = %Result%`nQ20 DPS:    %Q20Dps%
+        Result := Result . "`nQ20  DPS:" . StrPad(Q20Dps, 8, Side="left")
     }
 
     return Result
