@@ -1206,6 +1206,12 @@ StrTrimSpace(String)
     return RegExReplace(String, " *(.+?) *", "$1")
 }
 
+; StrLen support chinese word
+StrLenCP0(String)
+{
+    return StrPut(String, "cp0") - 1
+}
+
 ; Pads a string with a multiple of PadChar to become a wanted total length.
 ; Note that Side is the side that is padded not the anchored side.
 ; Meaning, if you pad right side, the text will move left. If Side was an 
@@ -1213,8 +1219,7 @@ StrTrimSpace(String)
 StrPad(String, Length, Side="right", PadChar=" ")
 {
 ;    Result := String
-    StringLen, Len, String
-    AddLen := Length-Len
+    AddLen := Length - StrLenCP0(String)
     If (AddLen <= 0)
     {
 ;        msgbox, String: %String%`, Length: %Length%`, Len: %Len%`, AddLen: %AddLen%
@@ -1302,17 +1307,17 @@ AssembleAffixDetails()
         {
             If (MirrorLineFieldWidth > 0)
             {
-                If(StrLen(AffixLine) > MirrorLineFieldWidth)
+                If(StrLenCP0(AffixLine) > MirrorLineFieldWidth)
                 {   
                     AffixLine := StrTrimSpaceRight(SubStr(AffixLine, 1, MirrorLineFieldWidth)) . Ellipsis
                 }
-                AffixLine := StrPad(AffixLine, MirrorLineFieldWidth + StrLen(Ellipsis))
+                AffixLine := StrPad(AffixLine, MirrorLineFieldWidth + StrLenCP0(Ellipsis))
             }
             ProcessedLine := AffixLine . Delim
         }
         IfInString, ValueRange, *
         {
-            ValueRangeString := StrPad(ValueRange, (ValueRangeFieldWidth * 2) + (StrLen(AffixDetailDelimiter)))
+            ValueRangeString := StrPad(ValueRange, (ValueRangeFieldWidth * 2) + (StrLenCP0(AffixDetailDelimiter)))
         }
         Else
         {
@@ -4468,7 +4473,7 @@ ParseItemData(ItemData, ByRef RarityLevel="", ByRef NumPrefixes="", ByRef NumSuf
     {
         RarityLevel := 0
         ItemLevel := ParseItemLevel(ItemData, "Level:")
-        ItemLevelWord := "Gem Level:"
+        ItemLevelWord := "寶石等級:"
     }
     Else
     {
@@ -4484,7 +4489,7 @@ ParseItemData(ItemData, ByRef RarityLevel="", ByRef NumPrefixes="", ByRef NumSuf
         {
             RarityLevel := CheckRarityLevel(ItemDataRarity)
             ItemLevel := ParseItemLevel(ItemData)
-            ItemLevelWord := "Item Level:"
+            ItemLevelWord := "物品等級:"
             ParseItemType(ItemDataStats, ItemDataNamePlate, ItemBaseType, ItemSubType, ItemGripType)
         }
     }
@@ -4548,13 +4553,13 @@ ParseItemData(ItemData, ByRef RarityLevel="", ByRef NumPrefixes="", ByRef NumSuf
     If (ShowItemLevel == 1 and Not IsMap)
     {
         TT := TT . "`n"
-        TT := TT . ItemLevelWord . "   " . StrPad(ItemLevel, 3, Side="left")
+        TT := TT . ItemLevelWord . StrPad(ItemLevel, 8, Side="left")
         If (Not IsFlask)
         {
             BaseLevel := CheckBaseLevel(ItemTypeName)
             If (BaseLevel)
             {
-                TT := TT . "`n" . "Base Level:   " . StrPad(BaseLevel, 3, Side="left")
+                TT := TT . "`n" . "基底等級:" . StrPad(BaseLevel, 8, Side="left")
             }
         }
     }
@@ -4598,8 +4603,8 @@ ParseItemData(ItemData, ByRef RarityLevel="", ByRef NumPrefixes="", ByRef NumSuf
         If (Not IsRing or IsUnsetRing)
         {
             TT := TT . "`n"
-            TT := TT . "Max Sockets:    "
-            TT := TT . ItemMaxSockets
+            TT := TT . "最大洞數:"
+            TT := TT . StrPad(ItemMaxSockets, 8, Side="left")
         }
     }
 
@@ -4664,22 +4669,8 @@ ParseItemData(ItemData, ByRef RarityLevel="", ByRef NumPrefixes="", ByRef NumSuf
     {
         If (RarityLevel > 1 and RarityLevel < 4)
         {
-            If (NumPrefixes = 1) 
-            {
-                WordPrefixes = Prefix
-            }
-            Else
-            {
-                WordPrefixes = Prefixes
-            }
-            If (NumSuffixes = 1) 
-            {
-                WordSuffixes = Suffix
-            }
-            Else
-            {
-                WordSuffixes = Suffixes
-            }
+            WordPrefixes = 前綴
+            WordSuffixes = 後綴
 
             PrefixLine = 
             If (NumPrefixes > 0) 
@@ -4696,7 +4687,7 @@ ParseItemData(ItemData, ByRef RarityLevel="", ByRef NumPrefixes="", ByRef NumSuf
             AffixStats =
             If (TotalAffixes > 0 and Not IsUnidentified)
             {
-                AffixStats = Affixes (%TotalAffixes%):%PrefixLine%%SuffixLine%
+                AffixStats = 詞綴 (%TotalAffixes%):%PrefixLine%%SuffixLine%
                 TT = %TT%`n--------`n%AffixStats%
             }
         }
@@ -4713,11 +4704,11 @@ ParseItemData(ItemData, ByRef RarityLevel="", ByRef NumPrefixes="", ByRef NumSuf
                 {
                     If (IsUnidentified)
                     {
-                        TT = %TT%`n--------`nUnidentified
+                        TT = %TT%`n--------`n未鑑定
                     }
                     Else
                     {
-                        TT = %TT%`n--------`nUnique item currently not supported
+                        TT = %TT%`n--------`n目前不支援獨特物品
                     }
                 }
             }
