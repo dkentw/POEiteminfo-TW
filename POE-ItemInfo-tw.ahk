@@ -275,11 +275,11 @@ SetFont(Font)
  
 ParseElementalDamage(String, DmgType, ByRef DmgLo, ByRef DmgHi)
 {
-    IfInString, String, %DmgType% 
+    IfInString, String, %DmgType%傷害 
     {
-        IfInString, String, Converted to or IfInString, String, taken as
+        IfInString, String, 轉換 or IfInString, String, 承受
             return
-        IfNotInString, String, increased 
+        IfNotInString, String, 增加
         {
             StringSplit, Arr, String, %A_Space%
             StringSplit, Arr, Arr2, -
@@ -1206,6 +1206,12 @@ StrTrimSpace(String)
     return RegExReplace(String, " *(.+?) *", "$1")
 }
 
+; StrLen support chinese word
+StrLenCP0(String)
+{
+    return StrPut(String, "cp0") - 1
+}
+
 ; Pads a string with a multiple of PadChar to become a wanted total length.
 ; Note that Side is the side that is padded not the anchored side.
 ; Meaning, if you pad right side, the text will move left. If Side was an 
@@ -1213,8 +1219,7 @@ StrTrimSpace(String)
 StrPad(String, Length, Side="right", PadChar=" ")
 {
 ;    Result := String
-    StringLen, Len, String
-    AddLen := Length-Len
+    AddLen := Length - StrLenCP0(String)
     If (AddLen <= 0)
     {
 ;        msgbox, String: %String%`, Length: %Length%`, Len: %Len%`, AddLen: %AddLen%
@@ -1302,17 +1307,17 @@ AssembleAffixDetails()
         {
             If (MirrorLineFieldWidth > 0)
             {
-                If(StrLen(AffixLine) > MirrorLineFieldWidth)
+                If(StrLenCP0(AffixLine) > MirrorLineFieldWidth)
                 {   
                     AffixLine := StrTrimSpaceRight(SubStr(AffixLine, 1, MirrorLineFieldWidth)) . Ellipsis
                 }
-                AffixLine := StrPad(AffixLine, MirrorLineFieldWidth + StrLen(Ellipsis))
+                AffixLine := StrPad(AffixLine, MirrorLineFieldWidth + StrLenCP0(Ellipsis))
             }
             ProcessedLine := AffixLine . Delim
         }
         IfInString, ValueRange, *
         {
-            ValueRangeString := StrPad(ValueRange, (ValueRangeFieldWidth * 2) + (StrLen(AffixDetailDelimiter)))
+            ValueRangeString := StrPad(ValueRange, (ValueRangeFieldWidth * 2) + (StrLenCP0(AffixDetailDelimiter)))
         }
         Else
         {
@@ -3994,10 +3999,6 @@ AssembleDamageDetails(FullItemData)
         IfInString, A_LoopField, 物理傷害:
         {
 ;            IsWeapon := True
-			IfInString, A_LoopField, 附加:
-			{
-				Continue
-			}
             StringSplit, Arr, A_LoopField, %A_Space%
             StringSplit, Arr, Arr2, -
             PhysLo := Arr1
@@ -4020,23 +4021,23 @@ AssembleDamageDetails(FullItemData)
         }
         
         ; Get percentage physical damage increase
-        IfInString, A_LoopField, `% 物理傷害
+        IfInString, A_LoopField, `% 物理傷害 and IfInString, A_LoopField, 增加
         {
             StringSplit, Arr, A_LoopField, %A_Space%, `%
-            PhysMult := Arr1
+            PhysMult := Arr2
             Continue
         }
         
         ;Lines to skip fix for converted type damage. Like the Voltaxic Rift
-        IfInString, A_LoopField, Converted to
+        IfInString, A_LoopField, 轉換為
             Goto, SkipDamageParse
-        IfInString, A_LoopField, can Shock
+        IfInString, A_LoopField, 可以感電
             Goto, SkipDamageParse
 
         ; Lines to skip for weapons that alter damage based on if equipped as
         ; main or off hand. In that case skipp the off hand calc and just use
         ; main hand as determining factor. Examples: Dyadus, Wings of Entropy
-        IfInString, A_LoopField, in Off Hand
+        IfInString, A_LoopField, 在副手
             Goto, SkipDamageParse
 
         ; Parse elemental damage
@@ -4057,7 +4058,9 @@ AssembleDamageDetails(FullItemData)
     EleDps := ((ChaoLo + ChaoHi + ColdLo + ColdHi + FireLo + FireHi + LighLo + LighHi) / 2) * AttackSpeed
     TotalDps := PhysDps + EleDps
     
-    Result = %Result%`nPhys DPS:   %PhysDps%`nElem DPS:   %EleDps%`nTotal DPS:  %TotalDps%
+    Result := Result . "`n物理 DPS:" . StrPad(PhysDps, 8, Side="left") 
+    Result := Result . "`n元素 DPS:" . StrPad(EleDps, 8, Side="left") 
+    Result := Result . "`n總合 DPS:" . StrPad(TotalDps, 8, Side="left")
     
     ; Only show Q20 values if item is not Q20
     If (Quality < 20) {
@@ -4065,7 +4068,7 @@ AssembleDamageDetails(FullItemData)
         BasePhysDps := PhysDps / TotalPhysMult
         Q20Dps := BasePhysDps * ((PhysMult + 120) / 100) + EleDps
         
-        Result = %Result%`nQ20 DPS:    %Q20Dps%
+        Result := Result . "`nQ20  DPS:" . StrPad(Q20Dps, 8, Side="left")
     }
 
     return Result
@@ -4470,7 +4473,7 @@ ParseItemData(ItemData, ByRef RarityLevel="", ByRef NumPrefixes="", ByRef NumSuf
     {
         RarityLevel := 0
         ItemLevel := ParseItemLevel(ItemData, "Level:")
-        ItemLevelWord := "Gem Level:"
+        ItemLevelWord := "寶石等級:"
     }
     Else
     {
@@ -4486,7 +4489,7 @@ ParseItemData(ItemData, ByRef RarityLevel="", ByRef NumPrefixes="", ByRef NumSuf
         {
             RarityLevel := CheckRarityLevel(ItemDataRarity)
             ItemLevel := ParseItemLevel(ItemData)
-            ItemLevelWord := "Item Level:"
+            ItemLevelWord := "物品等級:"
             ParseItemType(ItemDataStats, ItemDataNamePlate, ItemBaseType, ItemSubType, ItemGripType)
         }
     }
@@ -4550,13 +4553,13 @@ ParseItemData(ItemData, ByRef RarityLevel="", ByRef NumPrefixes="", ByRef NumSuf
     If (ShowItemLevel == 1 and Not IsMap)
     {
         TT := TT . "`n"
-        TT := TT . ItemLevelWord . "   " . StrPad(ItemLevel, 3, Side="left")
+        TT := TT . ItemLevelWord . StrPad(ItemLevel, 8, Side="left")
         If (Not IsFlask)
         {
             BaseLevel := CheckBaseLevel(ItemTypeName)
             If (BaseLevel)
             {
-                TT := TT . "`n" . "Base Level:   " . StrPad(BaseLevel, 3, Side="left")
+                TT := TT . "`n" . "基底等級:" . StrPad(BaseLevel, 8, Side="left")
             }
         }
     }
@@ -4600,8 +4603,8 @@ ParseItemData(ItemData, ByRef RarityLevel="", ByRef NumPrefixes="", ByRef NumSuf
         If (Not IsRing or IsUnsetRing)
         {
             TT := TT . "`n"
-            TT := TT . "Max Sockets:    "
-            TT := TT . ItemMaxSockets
+            TT := TT . "最大洞數:"
+            TT := TT . StrPad(ItemMaxSockets, 8, Side="left")
         }
     }
 
@@ -4666,22 +4669,8 @@ ParseItemData(ItemData, ByRef RarityLevel="", ByRef NumPrefixes="", ByRef NumSuf
     {
         If (RarityLevel > 1 and RarityLevel < 4)
         {
-            If (NumPrefixes = 1) 
-            {
-                WordPrefixes = Prefix
-            }
-            Else
-            {
-                WordPrefixes = Prefixes
-            }
-            If (NumSuffixes = 1) 
-            {
-                WordSuffixes = Suffix
-            }
-            Else
-            {
-                WordSuffixes = Suffixes
-            }
+            WordPrefixes = 前綴
+            WordSuffixes = 後綴
 
             PrefixLine = 
             If (NumPrefixes > 0) 
@@ -4698,7 +4687,7 @@ ParseItemData(ItemData, ByRef RarityLevel="", ByRef NumPrefixes="", ByRef NumSuf
             AffixStats =
             If (TotalAffixes > 0 and Not IsUnidentified)
             {
-                AffixStats = Affixes (%TotalAffixes%):%PrefixLine%%SuffixLine%
+                AffixStats = 詞綴 (%TotalAffixes%):%PrefixLine%%SuffixLine%
                 TT = %TT%`n--------`n%AffixStats%
             }
         }
@@ -4715,11 +4704,11 @@ ParseItemData(ItemData, ByRef RarityLevel="", ByRef NumPrefixes="", ByRef NumSuf
                 {
                     If (IsUnidentified)
                     {
-                        TT = %TT%`n--------`nUnidentified
+                        TT = %TT%`n--------`n未鑑定
                     }
                     Else
                     {
-                        TT = %TT%`n--------`nUnique item currently not supported
+                        TT = %TT%`n--------`n目前不支援獨特物品
                     }
                 }
             }
