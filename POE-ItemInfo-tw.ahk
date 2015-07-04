@@ -1717,7 +1717,7 @@ ParseAffixes(ItemDataChunk, ItemLevel, ItemQuality, ByRef NumPrefixes, ByRef Num
             HasIncrEnergyShield := A_Index
             Continue
         }
-        IfInString, A_LoopField, 格擋與暈眩回復
+        IfInString, A_LoopField, 暈眩回復
         {
             HasStunRecovery := A_Index
             Continue
@@ -3291,7 +3291,7 @@ ParseAffixes(ItemDataChunk, ItemLevel, ItemQuality, ByRef NumPrefixes, ByRef Num
             Continue
         }
 
-        IfInString, A_LoopField, 格擋與暈眩回復
+        IfInString, A_LoopField, 暈眩回復
         {
             AffixType := "Prefix"
             If (HasHybridDefences)

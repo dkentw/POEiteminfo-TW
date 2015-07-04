@@ -3,11 +3,14 @@ POEiteminfo-TW
 
 POE tool for checking the info of item, this version is for Taiwan server.
 
+## 版本變更 ##
+- 2015/07/04: 修正暈眩回復顯示不正常
 
 ## 安裝 ##
 - 請先安裝 AutoHotKey v1.0.45 以上 [http://ahkscript.org/download/](http://ahkscript.org/download/)
 - 從右邊可以下載整個 zip file
-- 解壓後, 按右鍵讓 AutoHotkey 執行 POE-ItemInfo-tw.ahk 即可
+- 解壓後, 按右鍵讓 AutoHotkey 執行 compile, 會得到 POE-ItemInfo-tw.exe
+- 用 POE-ItemInfo-tw.exe 來執行
 
 ### 注意事項 ###
 - Data 資料夾要存在同一層目錄
