@@ -4,7 +4,10 @@ POEiteminfo-TW
 POE tool for checking the info of item, this version is for Taiwan server.
 
 ## 版本變更 ##
-- 2015/07/04: 修正暈眩回復顯示不正常
+* 2015/07/04: 
+** 修正暈眩回復顯示不正常
+** 修正手套閃電傷害顯示不正常, 物理攻擊傷害偷取魔力
+
 
 ## 安裝 ##
 - 請先安裝 AutoHotKey v1.0.45 以上 [http://ahkscript.org/download/](http://ahkscript.org/download/)

@@ -555,7 +555,7 @@ ParseItemType(ItemDataStats, ItemDataNamePlate, ByRef BaseType, ByRef SubType, B
             SubType = Shield
             return
         }
-        IfInString, A_LoopField, Gloves
+        IfInString, A_LoopField, 手套
         {
             BaseType = Armour
             SubType = Gloves
@@ -567,7 +567,7 @@ ParseItemType(ItemDataStats, ItemDataNamePlate, ByRef BaseType, ByRef SubType, B
             SubType = Gloves
             return
         }
-        IfInString, A_LoopField, Gauntlets
+        IfInString, A_LoopField, 護手
         {
             BaseType = Armour
             SubType = Gloves
@@ -2760,7 +2760,7 @@ ParseAffixes(ItemDataChunk, ItemLevel, ItemQuality, ByRef NumPrefixes, ByRef Num
             NumPrefixes += 1
             Continue
         }
-        IfInString, A_LoopField, Physical Damage to Melee Attackers
+        IfInString, A_LoopField, 近戰物理傷害
         {
             NumPrefixes += 1
             ValueRange := LookupAffixData("data\PhysDamagereturn.txt", ItemLevel, CurrValue, "", CurrTier)
@@ -2825,6 +2825,13 @@ ParseAffixes(ItemDataChunk, ItemLevel, ItemQuality, ByRef NumPrefixes, ByRef Num
         {
             NumPrefixes += 1
             ValueRange := LookupAffixData("data\LifeLeech.txt", ItemLevel, CurrValue, "", CurrTier)
+            AppendAffixInfo(MakeAffixDetailLine(A_LoopField, "Prefix", ValueRange, CurrTier), A_Index)
+            Continue
+        }
+		IfInString, A_LoopField, 物理攻擊傷害偷取魔力
+        {
+            NumPrefixes += 1
+            ValueRange := LookupAffixData("data\ManaLeech.txt", ItemLevel, CurrValue, "", CurrTier)
             AppendAffixInfo(MakeAffixDetailLine(A_LoopField, "Prefix", ValueRange, CurrTier), A_Index)
             Continue
         }
